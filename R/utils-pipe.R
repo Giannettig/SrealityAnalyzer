@@ -12,3 +12,13 @@
 #' @param rhs A function call using the magrittr semantics.
 #' @return The result of calling `rhs(lhs)`.
 NULL
+
+#' Pipe operator
+#'
+#'
+#' @name %...>%
+#' @rdname promise
+#' @keywords internal
+#' @export
+#' @importFrom promises %...>%
+NULL
