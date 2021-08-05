@@ -4,13 +4,15 @@
 \alias{dump_DOM}
 \title{Dump a single url as HTML}
 \usage{
-dump_DOM(url)
+dump_DOM(url, element_class = NA)
 }
 \arguments{
 \item{url}{url to be scraped}
+
+\item{element_class}{the name of a class that the script will wait until loaded.}
 }
 \value{
-
+a html text
 }
 \description{
 Dump a single url as HTML

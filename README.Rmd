@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of SrealityAnalyzer is to ...
+The goal of SrealityAnalyzer is to provide a set of util libraries for the analysis of Sreality data. For more information regarding Sreality API check[https://admin.sreality.cz/doc/import.pdf] 
 
 ## Installation
 
@@ -28,7 +28,7 @@ You can install the released version of SrealityAnalyzer from [CRAN](https://CRA
 install.packages("SrealityAnalyzer")
 ```
 
-And the development version from [GitHub](https://github.com/) with:
+And the development version from [GitHub](https://github.com/Giannettig/SrealityAnalyzer) with: 
 
 ``` r
 # install.packages("devtools")
@@ -36,26 +36,88 @@ devtools::install_github("Giannettig/SrealityAnalyzer")
 ```
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Lets take a look how we can download data for a particular sreality query. 
+Go to www.sreality.cz and in the search select the atributes of the flats you are interested in. 
 
-```{r example}
+Then: 
+
+```{r example, paged.print=TRUE}
 library(SrealityAnalyzer)
 library(urltools)
 library(dplyr)
-## basic example code
+## This is an example of a query of the flats to buy and Rent
 
 url_prodej<-"https://www.sreality.cz/hledani/prodej/byty/ustecky-kraj,karlovarsky-kraj,stredocesky-kraj"
 url_pronajem<-"https://www.sreality.cz/hledani/pronajem/byty/ustecky-kraj,karlovarsky-kraj,stredocesky-kraj"
 
-#takhle nastavím parametry v adrese
+#You can use url tools to alter the query. 
 url<- urltools::param_set(url_prodej, key = "bez-aukce", value = "1")%>%
       urltools::param_set( key = "vlastnictvi", value = "osobni")%>%
-      urltools::param_set( key = "stari", value = "tyden")%>%
-      urltools::param_set( key = "strana", value = "14")
+      urltools::param_set( key = "stari", value = "tyden")
 
-byty_prodej_7dni<-rvest::read_html(url)
+print(url)
+```
+## Get the pagination urls
+
+Now that we have our query we need to figure out the number of listings and the pagination links to iterate through the server. 
+
+You gan use the function get_url_variants for that the function hits the query, figures out the number of pages to scroll and returns the urls with the page number to get through later.
+
+Note the `-blink-settings=imagesEnabled=false` argument that disables loading images. 
+
+```{r}
+## Take a search query and return pagination links
+
+pagination_links<-get_url_variants(url)
+
+print(pagination_links)
+```
+## Download the listings lists for all the pages.
+
+Now that we have the links lets download all the HTML files for further scrutiny
+
+```{r}
+#stáhni urls
+save_as_html( pagination_links$pages_url , output_dir = "data/html_dump")
+
+```
+## Now we can analyze the listings dumps and extract links to the detail
+
+```{r Get pagination detail, paged.print=TRUE}
+
+#vytvoř dataframe se základníma informacema o bytech odkaze na detail
+html_list<-list.files(path = "./data/html_dump", pattern = ".html", all.files = FALSE,
+           full.names = TRUE, recursive = FALSE,
+           ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
+
+html_details<-purrr::map_df(html_list,get_page_info)
+
+html_details
+```
+#Get listing detail
+
+Now that we have all the urls of the listing details we need to download we can use the utils functions we used before to download the listing details. 
+
+```{r}
+#Save all the urls as html documents for further analysis
+save_as_html( html_details$url , output_dir = "data/detail_dump")
+
+html_list<-list.files(path = "./data/detail_dump", pattern = ".html", all.files = FALSE,
+           full.names = TRUE, recursive = FALSE,
+           ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/master/examples>.
+#Parse listing details
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+Now that we got all the listings downloaded we need to parse out of them the information we need for further analysis
+
+```{r paged.print=TRUE}
+#Go through the list of downloaded data and make a dataframe
+parsed_details<-purrr::map_df(html_list,parse_flat_detail)
+```
+
+#Wrap up
+
+Now I need to write a function that logs, does a rerun of failed downloads and testing
+
+
