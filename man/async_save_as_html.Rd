@@ -4,14 +4,12 @@
 \alias{async_save_as_html}
 \title{Asynchronously save an webpage as a HTML Document}
 \usage{
-async_save_as_html(url, folder, element_class = NA)
+async_save_as_html(url, folder)
 }
 \arguments{
 \item{url}{the url to scrape}
 
 \item{folder}{the target folder to dump the html files}
-
-\item{element_class}{the name of a class that the script will wait until loaded.}
 }
 \value{
 a promise of the scraped page

@@ -1,14 +1,15 @@
+
+
 #' Asynchronously save an webpage as a HTML Document
 #'
 #' This is a working function to asynchronously receive DOM objects
 #'
 #' @param url the url to scrape
 #' @param folder the target folder to dump the html files
-#' @param element_class the name of a class that the script will wait until loaded.
 #'
 #' @return a promise of the scraped page
 #' @export
-async_save_as_html <- function(url,folder,element_class=NA) {
+async_save_as_html <- function(url,folder) {
   function(client) {
     Page <- client$Page
     Runtime <- client$Runtime
@@ -18,18 +19,16 @@ async_save_as_html <- function(url,folder,element_class=NA) {
     } %...>% {
       Page$loadEventFired()
     } %...>% {
-      Sys.sleep(0.2)
-    } %...>% {
       Runtime$evaluate(
         expression = 'document.documentElement.outerHTML')
     } %...>% (function(result) {
       html <- result$result$value
       cat(html, "\n", file = paste0(folder,"/",
-                                    Sys.time()%>%as.numeric(),"_",
                                     httr::parse_url(tolower(url))$hostname%>%
                                     stringr::str_replace_all("\\.","_")%>%
                                     stringr::str_replace("www_",""),
                                     ifelse(is.na(httr::parse_url(url)$query$strana),"",paste0("_strana_",httr::parse_url(url)$query$strana)),
+                                    ifelse(stringr::str_detect(url,"detail"),paste0("_detail_",stringr::str_extract(url,"[0-9]+$")),""),
                                     ".html"))})
   }}
 

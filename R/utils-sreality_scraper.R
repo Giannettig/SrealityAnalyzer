@@ -17,7 +17,7 @@ get_sreality_listings<-function(sreality_query){
     rvest::html_text()%>%.[2]%>%stringr::str_remove_all("\\s")%>%
     as.numeric()
 
-  return(number_of_listings)
+  return(ifelse(is.na(number_of_listings),0,number_of_listings))
 }
 
 
@@ -32,9 +32,21 @@ get_sreality_listings<-function(sreality_query){
 get_url_variants<-function(sreality_query){
 
   listings<-get_sreality_listings(sreality_query)
+
+  if(listings!=0){
   pages<-1:(ceiling(listings/20))
 
   url_list<-purrr::map_chr(pages, function(x){ urltools::param_set(sreality_query, key = "strana", value = x)})
+
+  }
+
+  else
+
+  {
+  url_list<-query
+  pages<-1
+  listings<-19
+  }
 
   return( list(pages_url=url_list,listings=listings,pages=max(pages)) )
 }
@@ -62,6 +74,9 @@ get_page_info<-function(html_dump_path){
     urltools::domain(url_snip) <-"https://www.sreality.cz"
 
     dplyr::tibble(
+
+      #pagination_url
+      page=html_dump_path%>%stringr::str_extract("[0-9]+$")%>%as.integer(),
 
       #name
       name=x%>%rvest::html_element("a")%>%rvest::html_text()%>%stringr::str_squish(),
@@ -116,6 +131,7 @@ parse_flat_detail<-function(html_detail_path){
       id=html%>%rvest::html_elements(xpath="//*[@property='og:url']")%>%rvest::html_attr("content")%>%stringr::str_extract("[0-9]+$")%>%ifelse(is.null(.),"",.),
       location=html%>%rvest::html_element(".location-text")%>%rvest::html_text()%>%ifelse(is.null(.),"",.),
       price=html%>%rvest::html_elements(".price")%>%rvest::html_elements(xpath="//*[@itemprop='price']")%>%rvest::html_text()%>%ifelse(is.null(.),"",.),
+      price_type=ifelse(stringr::str_detect(html_detail_path,"pronajem"),"rent",ifelse(stringr::str_detect(html_detail_path,"prodej"),"sale","other")),
       currency=html%>%rvest::html_elements(".price")%>%rvest::html_elements(xpath="//*[@itemprop='currency']")%>%rvest::html_attr("content")%>%ifelse(is.null(.),"",.),
       energy_rating=html%>%rvest::html_elements(".price")%>%rvest::html_elements(".energy-efficiency-rating__type")%>%rvest::html_text()%>%ifelse(is.null(.),"",.),
       energy_rating_text=html%>%rvest::html_elements(".price")%>%rvest::html_elements(".energy-efficiency-rating__text")%>%rvest::html_text()%>%ifelse(is.null(.),"",.),

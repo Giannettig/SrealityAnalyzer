@@ -42,7 +42,6 @@ Go to www.sreality.cz and in the search select the atributes of the flats you ar
 Then: 
 
 ```{r example, paged.print=TRUE}
-library(SrealityAnalyzer)
 library(urltools)
 library(dplyr)
 ## This is an example of a query of the flats to buy and Rent
@@ -51,73 +50,23 @@ url_prodej<-"https://www.sreality.cz/hledani/prodej/byty/ustecky-kraj,karlovarsk
 url_pronajem<-"https://www.sreality.cz/hledani/pronajem/byty/ustecky-kraj,karlovarsky-kraj,stredocesky-kraj"
 
 #You can use url tools to alter the query. 
-url<- urltools::param_set(url_prodej, key = "bez-aukce", value = "1")%>%
+query<- urltools::param_set(url_prodej, key = "bez-aukce", value = "1")%>%
       urltools::param_set( key = "vlastnictvi", value = "osobni")%>%
-      urltools::param_set( key = "stari", value = "tyden")
+      urltools::param_set( key = "stari", value = "tyden")%>%
+      urltools::param_set( key = "navic", value = "terasa,parkovani")
 
-print(url)
+print(query)
 ```
-## Get the pagination urls
+## Download the listings
 
-Now that we have our query we need to figure out the number of listings and the pagination links to iterate through the server. 
+Now that we have the listings we can use the function `scrape_sreality()` To download the listings on the query. 
+The function creates in the working directory a temp folder, where you can find the downloaded csv with the sreality listings and a log file describing the run of the scraper. 
 
-You gan use the function get_url_variants for that the function hits the query, figures out the number of pages to scroll and returns the urls with the page number to get through later.
-
-Note the `-blink-settings=imagesEnabled=false` argument that disables loading images. 
+Note that if there are less than 20 listings on the selected query there is no pagination so we assume there are 19 listings since we cannot check the real number.  
 
 ```{r}
-## Take a search query and return pagination links
-
-pagination_links<-get_url_variants(url)
-
-print(pagination_links)
+library(SrealityAnalyzer)
+# scrape_sreality(query)
 ```
-## Download the listings lists for all the pages.
-
-Now that we have the links lets download all the HTML files for further scrutiny
-
-```{r}
-#stáhni urls
-save_as_html( pagination_links$pages_url , output_dir = "data/html_dump")
-
-```
-## Now we can analyze the listings dumps and extract links to the detail
-
-```{r Get pagination detail, paged.print=TRUE}
-
-#vytvoř dataframe se základníma informacema o bytech odkaze na detail
-html_list<-list.files(path = "./data/html_dump", pattern = ".html", all.files = FALSE,
-           full.names = TRUE, recursive = FALSE,
-           ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
-
-html_details<-purrr::map_df(html_list,get_page_info)
-
-html_details
-```
-#Get listing detail
-
-Now that we have all the urls of the listing details we need to download we can use the utils functions we used before to download the listing details. 
-
-```{r}
-#Save all the urls as html documents for further analysis
-save_as_html( html_details$url , output_dir = "data/detail_dump")
-
-html_list<-list.files(path = "./data/detail_dump", pattern = ".html", all.files = FALSE,
-           full.names = TRUE, recursive = FALSE,
-           ignore.case = FALSE, include.dirs = FALSE, no.. = FALSE)
-```
-
-#Parse listing details
-
-Now that we got all the listings downloaded we need to parse out of them the information we need for further analysis
-
-```{r paged.print=TRUE}
-#Go through the list of downloaded data and make a dataframe
-parsed_details<-purrr::map_df(html_list,parse_flat_detail)
-```
-
-#Wrap up
-
-Now I need to write a function that logs, does a rerun of failed downloads and testing
 
 
