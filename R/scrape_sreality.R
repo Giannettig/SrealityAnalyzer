@@ -37,7 +37,7 @@ scrape_sreality<-function(query="https://www.sreality.cz/hledani/prodej/byty?vla
 
       #scrape the urls of the listings
       pagination_detail<-tryCatch(purrr::map(pagination_links$pages_url,async_get_sreality_pagination) %>%
-        crrri::perform_with_chrome(.list = .,extra_args = c('--blink-settings=imagesEnabled=false'))%>%bind_rows(),
+        crrri::perform_with_chrome(.list = .,extra_args = c('--blink-settings=imagesEnabled=false'))%>%dplyr::bind_rows(),
         error = function(c) {log4r::error(file_logger, c) },
         warning = function(c) log4r::warning(file_logger, c),
         message = function(c) log4r::info(file_logger, c)
@@ -55,7 +55,7 @@ scrape_sreality<-function(query="https://www.sreality.cz/hledani/prodej/byty?vla
 
 
       parsed_details<-tryCatch(purrr::map(pagination_detail$url,async_get_sreality_detail) %>%
-        crrri::perform_with_chrome(.list = .,extra_args = c('--blink-settings=imagesEnabled=false'))%>%bind_rows(),
+        crrri::perform_with_chrome(.list = .,extra_args = c('--blink-settings=imagesEnabled=false'))%>%dplyr::bind_rows(),
         error = function(c) {log4r::error(file_logger, c); log4r::debug(file_logger, paste0("Query: ", query)) },
         warning = function(c) log4r::warning(file_logger, c),
         message = function(c) log4r::info(file_logger, c)
