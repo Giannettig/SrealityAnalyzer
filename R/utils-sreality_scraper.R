@@ -146,39 +146,3 @@ parse_flat_detail<-function(html_detail_path){
 
 }
 
-
-
-
-# #enrich geocoding and add information
-# library('tidygeocoder')
-#
-# # go through google api
-# Sys.setenv(GOOGLEGEOCODE_API_KEY="AIzaSyCILf2H3etN0h5iXpUJI3A1mzR1XwY4Dtc")
-#
-# google_longs<- out_stores%>%
-#   geocode(store_adress, method = 'google', lat = latitude , long = longitude,unique_only = T, full_results = T)
-#
-# #test<-google_longs[[4]][[10]]
-#
-#
-# unpivot_location<-function(df){
-#   df<-as_tibble(df)
-#
-#   if(("types" %in% names(df))) {
-#
-#     df%>%mutate(type=types%>%map(1)%>%unlist)%>%
-#       filter(type %in% c("locality","country","administrative_area_level_1"))%>%
-#       select(type,short_name)%>%
-#       pivot_wider(values_from  = short_name, names_from = type)
-#   }else tibble(locality="", country="",administrative_area_level_1="")
-# }
-#
-# df<-google_longs$address_components%>%map_df(unpivot_location)
-#
-# df<-df%>%bind_cols(google_longs)
-#
-# dupl_longs<-google_longs[duplicated(google_longs$address),]
-#
-# #write the result
-# write_csv(google_longs,"out_data/lat_long.csv")
-
