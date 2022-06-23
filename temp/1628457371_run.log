@@ -1,0 +1,4 @@
+INFO  [2021-08-08 23:16:10] Starting scraping query: https://www.sreality.cz/hledani/prodej/byty/ustecky-kraj,karlovarsky-kraj,stredocesky-kraj?bez-aukce=1&vlastnictvi=osobni&stari=tyden&navic=terasa,parkovani
+INFO  [2021-08-08 23:16:21] There are 19 listings on this query.
+WARN  [2021-08-08 23:16:30] Fetched 10/19 links to listing detail
+WARN  [2021-08-08 23:16:55] Fetched 10/19 listings

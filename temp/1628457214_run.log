@@ -1,0 +1,6 @@
+INFO  [2021-08-08 23:13:33] Starting scraping query: https://www.sreality.cz/hledani/prodej/byty/ustecky-kraj,karlovarsky-kraj,stredocesky-kraj?bez-aukce=1&vlastnictvi=osobni&stari=tyden&navic=terasa,parkovani
+ERROR [2021-08-08 23:13:42] Error in get_url_variants(query): object 'query' not found
+
+DEBUG [2021-08-08 23:13:42] Query: https://www.sreality.cz/hledani/prodej/byty/ustecky-kraj,karlovarsky-kraj,stredocesky-kraj?bez-aukce=1&vlastnictvi=osobni&stari=tyden&navic=terasa,parkovani
+INFO  [2021-08-08 23:13:42] There are  listings on this query.
+ERROR [2021-08-08 23:13:44] Failed to retrieve pagination
